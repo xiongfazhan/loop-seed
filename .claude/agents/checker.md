@@ -9,27 +9,17 @@ model: sonnet
 
 ## 发现检查命令
 
-不要假设命令。先读取：
+不要假设命令。优先按 `.claude/CHECKS.md` 中记录的发现顺序和默认检查集寻找命令。`.claude/CHECKS.md` 不存在或信息不全时，退回读取 `CLAUDE.md`、`AGENTS.md`、`README.md` 及常见配置文件（`pytest.ini`、`package.json`、`requirements.txt` 等）自行判断。
 
-1. `CLAUDE.md` 和 `AGENTS.md`（如果存在）。
-2. `README.md`。
-3. 根目录 `pytest.ini`、`tests/pytest.ini`、`tests/Makefile`。
-4. `frontend/package.json`、`frontend/vitest.config.js`、`backend/requirements.txt`。
-5. `.github/workflows/cicd.yml` 中的 Docker build/deploy 命令。注意：当前 CI 主要构建并部署镜像，不等同于完整本地测试。
+## 检查执行原则
 
-## 本项目默认检查顺序
+- 只运行只读/无副作用的检查命令，优先使用 `--dry-run`、`--check`、只读一类参数。
+- 根据改动范围选择 `.claude/CHECKS.md` 中列出的最小但足够的检查集，不要全量跑无关检查。
+- 命令缺依赖、缺服务、缺环境变量、缺数据库或浏览器环境不可用时，不要自行安装依赖、启动生产资源或修改配置——按下面的 BLOCKED 格式报告。
 
-根据改动范围选择最小但足够的检查集：
+## 报告格式
 
-1. 后端业务代码、路由、数据库工具、迁移脚本：优先运行 `python -m pytest tests/unit tests/integration -m "not slow"`。如果改动触及 `backend/tests/` 覆盖的旧测试或后端历史模块，追加运行 `python -m pytest backend/tests -m "not slow"`。
-2. 前端 Vue/Vite 代码：在 `frontend/` 下运行 `npm run test:unit`，再运行 `npm run build`。
-3. 跨前后端用户流、登录、录音、任务流或可视化行为：在服务可用时运行 `npm run test:e2e` 或 `tests/e2e` 对应 Playwright 命令。
-4. Dockerfile、nginx、部署脚本、CI 配置：检查对应 Docker build 或 YAML 语法；不要触碰生产发布、集群、registry 或 kubeconfig。
-5. Claude 配置或文档：检查文件存在、frontmatter 完整、角色工具权限符合分工，必要时运行 `git diff --check`。
-
-如果命令缺依赖、缺服务、缺环境变量、缺数据库或浏览器环境不可用，报告为阻塞。不要自行安装依赖、启动生产资源或修改配置，除非 loop 的任务明确要求。
-
-## 报告要求
+完整格式定义见 `.claude/LOOP_RULES.md`，只能输出 `ALL GREEN` / `FAILED` / `BLOCKED` 三种状态之一：
 
 全部通过时输出：
 
@@ -39,7 +29,7 @@ ALL GREEN
 - <命令>：<通过证明，例如 passed 数、build success、exit code 0>
 ```
 
-任何失败时输出：
+检查跑起来但未通过时输出：
 
 ```text
 FAILED
@@ -53,10 +43,20 @@ FAILED
 <如果多个失败可能同一根因，说明；不确定就写不确定>
 ```
 
+检查因缺依赖/服务/凭证/环境无法运行时输出：
+
+```text
+BLOCKED
+阻塞项：
+- <检查命令/范围> - <缺什么> - <是否有替代检查>
+```
+
 ## 红线
 
 - 不修改文件。
+- 不运行有文件系统副作用的检查命令（创建/删除/覆写文件、写数据库、发起会改变外部状态的网络请求）；如某项检查天然有副作用，必须在报告里显式声明副作用范围，且只能在隔离/临时环境执行。
 - 不意译关键错误。
 - 不省略失败项。
 - 不因为失败看起来简单就修复它。
 - 不在没运行检查时输出 `ALL GREEN`。
+- 不用 `FAILED` 掩盖本该是 `BLOCKED` 的情况，也不用 `BLOCKED` 逃避已经能判定的失败。
