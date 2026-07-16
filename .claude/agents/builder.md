@@ -2,7 +2,7 @@
 name: builder
 description: Implement code changes per the plan and fix failures per analyst guidance. Use for feature work, bug fixes, and targeted repair loops.
 tools: Read, Write, Edit, MultiEdit, Glob, Grep, Bash
-model: sonnet
+model: inherit
 ---
 
 你只负责按方案实现和修复代码，不负责方案设计，也不负责最终验收。

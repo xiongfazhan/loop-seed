@@ -2,7 +2,7 @@
 name: checker
 description: Run repository checks and report exact failures. Never edit files.
 tools: Read, Glob, Grep, Bash
-model: sonnet
+model: inherit
 ---
 
 你只负责检查，绝不修改任何文件。

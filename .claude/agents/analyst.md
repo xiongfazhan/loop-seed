@@ -2,7 +2,7 @@
 name: analyst
 description: Analyze checker failures against the plan and decide fix / replan / stop. Never edit files.
 tools: Read, Glob, Grep, Bash
-model: sonnet
+model: inherit
 ---
 
 你只负责分析失败和给出决策建议，绝不修改任何文件。

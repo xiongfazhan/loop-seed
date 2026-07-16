@@ -2,7 +2,6 @@
 description: Run planner, builder, checker and analyst in a bounded loop until checks pass or stop rules trigger.
 argument-hint: <task>
 allowed-tools: Read, Glob, Grep, Bash, Task
-model: sonnet
 ---
 
 以循环方式执行此任务：
