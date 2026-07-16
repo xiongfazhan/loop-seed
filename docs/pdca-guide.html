@@ -1,0 +1,485 @@
+<title>/pdca 使用教程与工作流程</title>
+<style>
+  :root {
+    --ground: #efeee7;
+    --surface: #f8f7f1;
+    --raised: #ffffff;
+    --ink: #24261e;
+    --ink-muted: #5b5d4f;
+    --ink-faint: #8b8c7c;
+    --rule: #d9d6c8;
+    --rule-strong: #c3bfae;
+    --accent: #31465a;
+    --accent-soft: #dce3e8;
+    --pass: #3f7d53;
+    --pass-soft: #e1ebe0;
+    --risk: #b23a2e;
+    --risk-soft: #f3e1dc;
+    --warn: #a6752c;
+    --warn-soft: #f1e6d3;
+    --plan: #5a4a7a;
+    --plan-soft: #e6e0ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #16181a; --surface: #1c1f21; --raised: #202326;
+      --ink: #e7e5dc; --ink-muted: #a3a394; --ink-faint: #6d6f62;
+      --rule: #34373a; --rule-strong: #454850;
+      --accent: #8bacc4; --accent-soft: #24343e;
+      --pass: #7cba8c; --pass-soft: #1e2c21;
+      --risk: #e08a7c; --risk-soft: #2e1f1c;
+      --warn: #dbae5c; --warn-soft: #2e2718;
+      --plan: #a893cc; --plan-soft: #2a2436;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #16181a; --surface: #1c1f21; --raised: #202326;
+    --ink: #e7e5dc; --ink-muted: #a3a394; --ink-faint: #6d6f62;
+    --rule: #34373a; --rule-strong: #454850;
+    --accent: #8bacc4; --accent-soft: #24343e;
+    --pass: #7cba8c; --pass-soft: #1e2c21;
+    --risk: #e08a7c; --risk-soft: #2e1f1c;
+    --warn: #dbae5c; --warn-soft: #2e2718;
+    --plan: #a893cc; --plan-soft: #2a2436;
+  }
+  :root[data-theme="light"] {
+    --ground: #efeee7; --surface: #f8f7f1; --raised: #ffffff;
+    --ink: #24261e; --ink-muted: #5b5d4f; --ink-faint: #8b8c7c;
+    --rule: #d9d6c8; --rule-strong: #c3bfae;
+    --accent: #31465a; --accent-soft: #dce3e8;
+    --pass: #3f7d53; --pass-soft: #e1ebe0;
+    --risk: #b23a2e; --risk-soft: #f3e1dc;
+    --warn: #a6752c; --warn-soft: #f1e6d3;
+    --plan: #5a4a7a; --plan-soft: #e6e0ef;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace; font-variant-numeric: tabular-nums; }
+  .page { max-width: 980px; margin: 0 auto; padding: 56px 32px 96px; }
+
+  header.hero { padding-bottom: 34px; border-bottom: 1px solid var(--rule); margin-bottom: 44px; }
+  .eyebrow {
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent);
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  }
+  .eyebrow::before { content: ""; width: 22px; height: 1px; background: var(--accent); }
+  h1 { font-size: clamp(28px,4vw,38px); line-height: 1.25; margin: 0 0 12px; font-weight: 700; text-wrap: balance; letter-spacing: -.01em; }
+  .dek { color: var(--ink-muted); max-width: 640px; margin: 0; font-size: 16.5px; }
+
+  section { margin-bottom: 60px; }
+  .shead { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+  .snum { color: var(--accent); font-size: 13px; letter-spacing: .06em; }
+  h2 { font-size: 21px; margin: 0; font-weight: 700; }
+  .sintro { color: var(--ink-muted); max-width: 660px; margin: 8px 0 24px; }
+  h3 { font-size: 16px; margin: 28px 0 10px; font-weight: 700; }
+  p.body { max-width: 680px; }
+
+  /* terminal block */
+  .term {
+    background: var(--raised);
+    border: 1px solid var(--rule-strong);
+    padding: 16px 20px;
+    font-family: ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin: 14px 0;
+  }
+  .term .p { color: var(--ink-faint); user-select: none; }
+  .term .c { color: var(--accent); font-weight: 600; }
+  .term .cm { color: var(--ink-faint); }
+  .term .g { color: var(--pass); }
+  .term .r { color: var(--risk); }
+  .term .w { color: var(--warn); }
+  code.inline {
+    font-family: ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;
+    font-size: .9em; background: var(--accent-soft); color: var(--accent); padding: 1px 6px;
+  }
+
+  /* analogy grid (beginner) */
+  .analogy { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 18px 0; }
+  .acell { background: var(--surface); padding: 16px 16px 14px; }
+  .acell .amap { font-size: 13px; color: var(--ink-faint); margin-bottom: 8px; }
+  .acell .arole { font-family: ui-monospace,Consolas,monospace; font-weight: 700; font-size: 14px; }
+  .acell p { margin: 8px 0 0; font-size: 13px; color: var(--ink-muted); }
+  .acell.plan .arole { color: var(--plan); }
+  .acell.build .arole { color: var(--accent); }
+  .acell.check .arole { color: var(--pass); }
+  .acell.act .arole { color: var(--warn); }
+
+  /* role cards */
+  .roles { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .role { background: var(--surface); padding: 18px 18px 16px; }
+  .role .rname { font-family: ui-monospace,"SF Mono",Consolas,monospace; font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .role .rstage { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
+  .role p { margin: 0 0 10px; font-size: 13.5px; color: var(--ink-muted); }
+  .role .rtools { font-family: ui-monospace,Consolas,monospace; font-size: 11px; color: var(--ink-faint); border-top: 1px solid var(--rule); padding-top: 8px; }
+  .role.plan .rname, .role.plan .rstage { color: var(--plan); }
+  .role.build .rname, .role.build .rstage { color: var(--accent); }
+  .role.check .rname, .role.check .rstage { color: var(--pass); }
+  .role.act .rname, .role.act .rstage { color: var(--warn); }
+
+  /* ---------- flowchart ---------- */
+  .flow {
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    padding: 36px 20px;
+    overflow-x: auto;
+  }
+  .flow-inner { min-width: 640px; max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+  .fbox {
+    font-family: ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;
+    font-size: 13px; line-height: 1.5;
+    border: 1px solid var(--rule-strong);
+    background: var(--raised);
+    padding: 10px 20px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  .fbox small { display: block; font-size: 11px; color: var(--ink-faint); }
+  .fbox.entry { border-color: var(--ink); font-weight: 700; }
+  .fbox.plan { border-color: var(--plan); color: var(--plan); background: var(--plan-soft); }
+  .fbox.build { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .fbox.check { border-color: var(--pass); color: var(--pass); background: var(--pass-soft); }
+  .fbox.act { border-color: var(--warn); color: var(--warn); background: var(--warn-soft); }
+  .fbox.done { border-color: var(--pass); color: var(--pass); background: var(--pass-soft); font-weight: 700; }
+  .fbox.stop { border-color: var(--risk); color: var(--risk); background: var(--risk-soft); font-weight: 700; }
+
+  .varrow { width: 1px; height: 26px; background: var(--rule-strong); position: relative; }
+  .varrow::after {
+    content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--rule-strong);
+  }
+  .vlabel { font-family: ui-monospace,Consolas,monospace; font-size: 11px; color: var(--ink-faint); margin: 4px 0; letter-spacing: .04em; }
+
+  .cyclewrap {
+    border: 1px dashed var(--rule-strong);
+    padding: 26px 24px 22px;
+    margin-top: 4px;
+    position: relative;
+    display: flex; flex-direction: column; align-items: center;
+    width: 100%;
+  }
+  .cyclewrap .cyclelabel {
+    position: absolute; top: -10px; left: 18px;
+    background: var(--surface); padding: 0 8px;
+    font-family: ui-monospace,Consolas,monospace; font-size: 11.5px; color: var(--ink-muted); letter-spacing: .05em;
+  }
+  .branch3 {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; width: 100%; margin-top: 26px;
+  }
+  .branchcol { display: flex; flex-direction: column; align-items: center; }
+  .branchcol .blabel {
+    font-family: ui-monospace,Consolas,monospace; font-size: 11px; letter-spacing: .05em; margin-bottom: 6px;
+  }
+  .blabel.g { color: var(--pass); }
+  .blabel.r { color: var(--risk); }
+  .blabel.w { color: var(--warn); }
+  .backnote {
+    font-family: ui-monospace,Consolas,monospace; font-size: 11px; color: var(--ink-faint);
+    margin-top: 8px; text-align: center; line-height: 1.7;
+  }
+  .backnote b { color: var(--ink-muted); }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 18px; justify-content: center; font-size: 12px; color: var(--ink-muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border: 1px solid var(--rule-strong); display: inline-block; }
+
+  /* tables */
+  .twrap { overflow-x: auto; border: 1px solid var(--rule); }
+  table { border-collapse: collapse; width: 100%; background: var(--surface); font-size: 14px; }
+  th, td { text-align: left; padding: 10px 16px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; background: var(--raised); }
+  tr:last-child td { border-bottom: none; }
+  td.mono { font-size: 13px; white-space: nowrap; }
+  td .yes { color: var(--pass); font-weight: 700; }
+  td .no { color: var(--risk); font-weight: 700; }
+
+  .note {
+    border-left: 3px solid var(--warn);
+    background: var(--warn-soft);
+    padding: 12px 18px;
+    font-size: 14px;
+    color: var(--ink);
+    margin: 18px 0;
+  }
+  .note.blue { border-left-color: var(--accent); background: var(--accent-soft); }
+  .note.danger { border-left-color: var(--risk); background: var(--risk-soft); }
+  .note .nt { font-weight: 700; display: block; margin-bottom: 4px; }
+
+  ol.steps { margin: 0; padding-left: 22px; }
+  ol.steps li { margin-bottom: 12px; max-width: 680px; }
+  ol.steps li::marker { color: var(--accent); font-weight: 700; }
+  ul.plain { margin: 8px 0; padding-left: 20px; max-width: 680px; }
+  ul.plain li { margin-bottom: 6px; }
+
+  footer { margin-top: 60px; padding-top: 18px; border-top: 1px solid var(--rule); font-size: 12.5px; color: var(--ink-faint); }
+
+  @media (max-width: 760px) {
+    .roles, .analogy { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+
+<div class="page">
+  <header class="hero">
+    <div class="eyebrow mono">LOOP-SEED · PDCA WORKFLOW GUIDE</div>
+    <h1>/pdca 使用教程与工作流程</h1>
+    <p class="dek">从零讲起：这套机制解决什么问题、四个角色怎么配合、一条命令怎么用、以及怎么装到你自己的项目里。没接触过 loop 机制也能看懂。</p>
+  </header>
+
+  <!-- ==================== 这是什么 ==================== -->
+  <section>
+    <div class="shead"><span class="snum mono">§01</span><h2>先搞懂这是什么（零基础）</h2></div>
+    <p class="sintro">如果你从没用过"loop 机制"，先读这一节。看懂了再往下，后面全是细节。</p>
+
+    <h3>它想解决的问题</h3>
+    <p class="body">让 AI 改代码，最大的坑是它可能"自说自话"：改完直接说"好了，测试通过"——但它到底跑没跑测试？会不会为了让测试变绿，偷偷把测试删了、把断言注释了？你没法确认。</p>
+
+    <h3>它的办法：把"改"和"验"拆开，互不信任</h3>
+    <p class="body">这套机制把一次代码修改拆成四个独立角色，每个角色权限被死死限制住，谁也没法既当运动员又当裁判。用工地打个比方就很清楚：</p>
+    <div class="analogy">
+      <div class="acell plan">
+        <div class="amap">相当于 · 设计师</div>
+        <div class="arole">planner</div>
+        <p>先画图纸（方案），定清楚要改哪、改成什么样、怎么算完工。不亲自施工。</p>
+      </div>
+      <div class="acell build">
+        <div class="amap">相当于 · 施工队</div>
+        <div class="arole">builder</div>
+        <p>只照图纸施工（写代码）。图纸没说的不擅自改，图纸和现场矛盾就停工上报。</p>
+      </div>
+      <div class="acell check">
+        <div class="amap">相当于 · 监理</div>
+        <div class="arole">checker</div>
+        <p>只验收、只报问题。手里根本没有动工地的工具（没分配改文件权限），想造假也做不到。</p>
+      </div>
+      <div class="acell act">
+        <div class="amap">相当于 · 项目经理</div>
+        <div class="arole">analyst</div>
+        <p>验收不过时拍板：是施工没照图纸（返工），还是图纸本身错了（改设计），还是这活超纲了（叫停）。</p>
+      </div>
+    </div>
+    <p class="body">关键在于 <b>checker 物理上无法改代码</b>——它的工具清单里就没有"写文件"这一项。所以"测试通过"这句话不可能是它编出来的，必须是真跑出来的。这就是整套机制的信任基础。</p>
+
+    <h3>"有界(bounded)"是什么意思</h3>
+    <p class="body">就是<b>最多来回几轮就必须停</b>（默认 5 轮）。防止 AI 卡在一个问题上无限次瞎试、把时间和额度烧光。到点了、或者发现"越改越糟""连续两轮同一个错"这类信号，机制会强制刹车，把情况原样交还给你决定，而不是硬撑。</p>
+
+    <div class="note blue"><span class="nt">一句话总结</span>这是一个"防 AI 自说自话"的施工—监理机制：改代码的不负责验收，验收的改不了代码，出了问题有人专门判断该返工还是改方案，而且最多来回 5 轮就必须给你交代。</div>
+  </section>
+
+  <!-- ==================== 快速开始 ==================== -->
+  <section>
+    <div class="shead"><span class="snum mono">§02</span><h2>快速开始（在本仓库里用）</h2></div>
+    <p class="sintro">本仓库（loop-seed）已经配好这套机制。在 Claude Code 会话里输入一条命令即可，剩下的流转全自动：</p>
+    <div class="term">
+      <span class="p">&gt;</span> <span class="c">/pdca</span> 修复登录接口在密码含中文时返回 500 的问题
+    </div>
+    <p class="body">执行过程中你会看到类似这样的进度输出：</p>
+    <div class="term">
+      <span class="cm"># 任务简报：目标 / 涉及区域 / 完成标准 / 要跑的检查</span><br>
+      <span class="cm"># planner 方案 v1：改法、涉及文件、完成标准、风险</span><br>
+      <br>
+      Cycle 1/5<br>
+      <span class="p">├─</span> builder&nbsp;&nbsp;改了什么 / 修改文件 / 与方案的偏差<br>
+      <span class="p">└─</span> checker&nbsp;&nbsp;<span class="r">FAILED</span>（2 个失败项 + 原始报错）<br>
+      <span class="p">&nbsp;&nbsp;&nbsp;</span>analyst&nbsp;&nbsp;<span class="w">FIX</span> → 实现偏差，给出修复指引<br>
+      <br>
+      Cycle 2/5<br>
+      <span class="p">├─</span> builder&nbsp;&nbsp;按指引修复<br>
+      <span class="p">└─</span> checker&nbsp;&nbsp;<span class="g">ALL GREEN</span>（逐项通过证明）<br>
+      <br>
+      <span class="g">✔ 完成</span>：展示 diff 摘要 + 检查结果
+    </div>
+    <div class="note blue"><span class="nt">注意命令是 /pdca 不是 /loop</span><code class="inline">/loop</code> 是 Claude Code 的内置定时循环命令（按固定间隔重复跑任务），和本框架无关。本框架的命令特意叫 <code class="inline">/pdca</code> 就是为了不撞名。</div>
+  </section>
+
+  <!-- ==================== 角色 ==================== -->
+  <section>
+    <div class="shead"><span class="snum mono">§03</span><h2>四个角色的职责与权限</h2></div>
+    <p class="sintro">每个角色是一个独立子代理，在自己的上下文里运行。"不能改文件"由工具白名单强制——没分配 Write/Edit 就物理写不了，不靠自觉。</p>
+    <div class="roles">
+      <div class="role plan">
+        <div class="rname">planner</div>
+        <div class="rstage">Plan · 方案</div>
+        <p>基于实际读过的代码出方案：改法、涉及文件、可机械验证的完成标准。REPLAN 时修订方案并列出差异。</p>
+        <div class="rtools">Read Glob Grep Bash（只读）</div>
+      </div>
+      <div class="role build">
+        <div class="rname">builder</div>
+        <div class="rstage">Do · 实现</div>
+        <p>严格按方案实现，不扩大范围；发现方案与代码冲突时停下汇报，不自作主张。汇报必含"与方案的偏差"。</p>
+        <div class="rtools">Read Write Edit MultiEdit Glob Grep Bash</div>
+      </div>
+      <div class="role check">
+        <div class="rname">checker</div>
+        <div class="rstage">Check · 验收</div>
+        <p>按 CHECKS.md 选最小检查集运行，只输出三种状态之一：ALL GREEN / FAILED / BLOCKED，报错原文照抄不转述。</p>
+        <div class="rtools">Read Glob Grep Bash（禁副作用命令）</div>
+      </div>
+      <div class="role act">
+        <div class="rname">analyst</div>
+        <div class="rstage">Act · 反馈</div>
+        <p>判断失败出在哪一层：实现偏差→FIX，方案假设错→REPLAN，超能力边界→STOP。分析只能附加在原始报告旁。</p>
+        <div class="rtools">Read Glob Grep Bash（只读）</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 流程图 ==================== -->
+  <section>
+    <div class="shead"><span class="snum mono">§04</span><h2>工作流程图</h2></div>
+    <p class="sintro">虚线框内是循环体，最多 5 轮；三个出口里只有 ALL GREEN 算成功，其余两个都会按升级协议把完整上下文交还给你。</p>
+    <div class="flow">
+      <div class="flow-inner">
+        <div class="fbox entry">/pdca &lt;任务&gt;<small>调度器写任务简报</small></div>
+        <div class="varrow"></div>
+        <div class="fbox plan">planner → 方案 v1<small>改法 · 涉及文件 · 完成标准 · 检查集 · 风险</small></div>
+        <div class="varrow"></div>
+
+        <div class="cyclewrap">
+          <span class="cyclelabel">循环体 · Cycle N/5</span>
+          <div class="fbox build">builder 按方案实现 / 按指引修复<small>汇报：改了什么 · 与方案的偏差</small></div>
+          <div class="varrow"></div>
+          <div class="fbox check">checker 运行最小检查集<small>输出三态之一</small></div>
+
+          <div class="branch3">
+            <div class="branchcol">
+              <span class="blabel g">ALL GREEN</span>
+              <div class="fbox done">✔ 成功停止<small>展示 diff + 逐项通过证明</small></div>
+            </div>
+            <div class="branchcol">
+              <span class="blabel w">FAILED</span>
+              <div class="fbox act">analyst 分析<small>方案+汇报+原始报告 三份齐全才判断</small></div>
+              <div class="backnote">
+                <b>FIX</b> → 回 builder（修实现）<br>
+                <b>REPLAN</b> → 回 planner 出 v2<br>（全任务限 1 次）<br>
+                <b>STOP</b> → 升级
+              </div>
+            </div>
+            <div class="branchcol">
+              <span class="blabel r">BLOCKED</span>
+              <div class="fbox stop">✋ 立即停止升级<small>缺依赖/服务/凭证，重试无意义</small></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="varrow"></div>
+        <div class="vlabel">任一机械停止规则命中（无论 analyst 说什么）</div>
+        <div class="fbox stop">升级给用户<small>轮次 · 原因 · 方案版本 · 仍失败项 · 已试修复 · 下一步建议</small></div>
+
+        <div class="legend">
+          <span><span class="swatch" style="background:var(--plan-soft);border-color:var(--plan)"></span>Plan</span>
+          <span><span class="swatch" style="background:var(--accent-soft);border-color:var(--accent)"></span>Do</span>
+          <span><span class="swatch" style="background:var(--pass-soft);border-color:var(--pass)"></span>Check</span>
+          <span><span class="swatch" style="background:var(--warn-soft);border-color:var(--warn)"></span>Act</span>
+          <span><span class="swatch" style="background:var(--risk-soft);border-color:var(--risk)"></span>停止/升级</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 停止规则 ==================== -->
+  <section>
+    <div class="shead"><span class="snum mono">§05</span><h2>停止规则速查</h2></div>
+    <p class="sintro">由调度器机械执行，analyst 只能建议提前停，不能让循环多跑一轮。完整定义见 <code class="inline">.claude/LOOP_RULES.md</code>。</p>
+    <div class="twrap">
+      <table>
+        <thead><tr><th style="width:52px">#</th><th style="width:160px">条件</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">1</td><td>ALL GREEN</td><td>唯一的成功出口，须附每项检查的通过证明</td></tr>
+          <tr><td class="mono">2</td><td>轮次用尽</td><td>默认 5 轮上限，项目 CLAUDE.md 可覆盖</td></tr>
+          <tr><td class="mono">3</td><td>同一失败 ×2</td><td>按「检查命令 + file + 错误类型」归一化比较，不比报错原文；连续两轮同 key 即停</td></tr>
+          <tr><td class="mono">4</td><td>出现回归</td><td>之前通过的检查在后续轮次失败</td></tr>
+          <tr><td class="mono">5</td><td>无实质进展</td><td>连续 2 轮失败 key 数量没有减少；新失败不能抵消旧失败</td></tr>
+          <tr><td class="mono">6</td><td>BLOCKED</td><td>缺依赖/服务/凭证/环境，出现一次即停，不计入失败计数</td></tr>
+          <tr><td class="mono">7</td><td>范围失控</td><td>修复需要架构、schema、认证授权或生产部署级变更</td></tr>
+          <tr><td class="mono">8</td><td>REPLAN 超限</td><td>全任务最多重新规划 1 次，第二次 REPLAN 视为方案反复推翻，停止升级</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ==================== 单独调用 ==================== -->
+  <section>
+    <div class="shead"><span class="snum mono">§06</span><h2>单独调用某个角色</h2></div>
+    <p class="sintro">不想跑完整循环时，可以直接点名子代理，适合"只看方案"或"只查状态"的场景：</p>
+    <div class="term">
+      <span class="p">&gt;</span> 用 planner 代理给"发票列表加导出 Excel"出个方案，先不要实现<br>
+      <span class="p">&gt;</span> 用 checker 代理跑一遍后端相关检查，告诉我现在什么状态<br>
+      <span class="p">&gt;</span> 用 analyst 代理分析一下这份测试报告，判断是实现问题还是方案问题
+    </div>
+    <div class="note"><span class="nt">小任务别走 /pdca</span>改 typo、调一行配置这种，四角色每轮多两次子代理调用，token 和时间成本都更高。直接让主会话改完、再单独派 checker 验一次，往往更划算。</div>
+  </section>
+
+  <!-- ==================== 装到你自己的项目 ==================== -->
+  <section>
+    <div class="shead"><span class="snum mono">§07</span><h2>装到你自己的项目</h2></div>
+    <p class="sintro">这是最容易踩坑的一节，务必读完。把机制搬到别的项目，只需要复制几个文件——但有<b>一个文件必须为新项目改写</b>，否则命令能出现却验收不了任何东西。</p>
+
+    <h3>第一步：复制哪些文件</h3>
+    <p class="body">把本仓库的以下内容整体复制到你项目的根目录：</p>
+    <div class="twrap">
+      <table>
+        <thead><tr><th style="width:280px">文件 / 目录</th><th style="width:80px">层</th><th style="width:70px">要改吗</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">.claude/agents/（4 个角色）</td><td>框架</td><td><span class="no">否</span></td><td>四个子代理，命令派活的对象</td></tr>
+          <tr><td class="mono">.claude/commands/pdca.md</td><td>框架</td><td><span class="no">否</span></td><td>定义 /pdca 命令本身</td></tr>
+          <tr><td class="mono">.claude/LOOP_RULES.md</td><td>框架</td><td><span class="no">否</span></td><td>角色分工、停止规则、红线（与技术栈无关）</td></tr>
+          <tr><td class="mono">.claude/CHECKS.md</td><td>项目</td><td><span class="yes">必改</span></td><td>本项目的技术栈、目录、检查命令</td></tr>
+          <tr><td class="mono">CLAUDE.md</td><td>项目</td><td><span class="yes">必改</span></td><td>项目背景（Project Context 部分）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note danger"><span class="nt">⚠ 为什么 CHECKS.md 一定要重写</span>现在的 <code class="inline">.claude/CHECKS.md</code> 写的是本项目的检查命令（<code class="inline">pytest tests/unit</code>、<code class="inline">npm run test:unit</code> 等）。如果你把它<b>原样</b>搬到一个纯前端 / Go / Rust 项目，checker 去执行 pytest 会找不到，直接报 <code class="inline">BLOCKED</code>——循环跑起来了，但验收环节是空的，等于白跑。checker 和 builder 都是从这个文件里"发现"该跑什么检查的，所以它必须换成目标项目自己的命令。</div>
+
+    <h3>第二步：为新项目改写 CHECKS.md</h3>
+    <p class="body">把 CHECKS.md 里三块内容换成你项目的实际情况：</p>
+    <ul class="plain">
+      <li><b>技术栈与目录</b>：你项目用什么语言/框架，代码和测试放在哪</li>
+      <li><b>检查命令发现顺序</b>：checker 该读哪些配置文件找命令（如 <code class="inline">package.json</code>、<code class="inline">Makefile</code>、<code class="inline">go.mod</code>）</li>
+      <li><b>默认检查集</b>：不同改动范围分别跑什么命令（单测、构建、lint、类型检查等），且必须是<b>只读无副作用</b>的</li>
+    </ul>
+
+    <h3>第三步：改 CLAUDE.md 的项目背景</h3>
+    <p class="body">把 Project Context 换成新项目的一句话介绍，保留指向 <code class="inline">.claude/LOOP_RULES.md</code> 和 <code class="inline">.claude/CHECKS.md</code> 的说明即可。轮次上限想改（默认 5）也在这里覆盖。</p>
+
+    <h3>第四步：确保是 git 仓库</h3>
+    <p class="body">如果项目还不是 git 仓库，先 <code class="inline">git init</code> 并提交一次。循环的可回滚性依赖每轮改动都有提交点——出问题能退回来。</p>
+
+    <h3>第五步：验证</h3>
+    <ol class="steps">
+      <li>重开一个 Claude Code 会话，让它重新扫描 <code class="inline">.claude/</code> 目录（新命令/新代理有时需要新会话才出现）。</li>
+      <li>输入 <code class="inline">/pdca</code>，确认命令出现在补全列表里。</li>
+      <li>先拿一个<b>小而明确、预期会失败一两次</b>的任务试跑一轮，观察 planner→builder→checker→analyst 的流转和停止规则是否正常，再用于正式任务。</li>
+    </ol>
+
+    <div class="note blue"><span class="nt">设计初衷</span>框架层（agents + pdca.md + LOOP_RULES.md）与项目层（CHECKS.md + CLAUDE.md）当初就是特意拆开的，就是为了让搬家时只动两个项目层文件，框架层一个字都不用改。</div>
+  </section>
+
+  <!-- ==================== FAQ ==================== -->
+  <section>
+    <div class="shead"><span class="snum mono">§08</span><h2>常见问题</h2></div>
+    <h3>只放 .claude 文件夹和 CLAUDE.md 就能用 /pdca 吗？</h3>
+    <p class="body">命令会出现——但要真正跑通，必须先把 <code class="inline">.claude/CHECKS.md</code> 换成目标项目自己的检查命令，否则 checker 一步就 BLOCKED。详见 §07。</p>
+    <h3>循环用哪个模型？</h3>
+    <p class="body">所有角色都 <code class="inline">model: inherit</code>，跟随主会话——你 <code class="inline">/model</code> 切到什么，整条循环就用什么。想让某个角色固定用更强/更便宜的模型，改对应 agent 文件的 model 字段即可。</p>
+    <h3>循环中途我能插手吗？</h3>
+    <p class="body">能。循环在主会话里调度，随时可以打断补充信息或叫停。停止升级后修完阻塞点，直接再发一次 <code class="inline">/pdca</code> 重新开始（轮次从 1 重计，planner 会基于当前代码状态出新方案）。</p>
+    <h3>为什么 checker 报 BLOCKED 而不是想办法装依赖？</h3>
+    <p class="body">设计如此：checker 无权改变环境（装依赖、启服务都算副作用），环境问题该由你决策。这防止循环在"检查环境"这件事上自作主张越走越远。</p>
+    <h3>本仓库现在能直接跑通吗？</h3>
+    <p class="body">框架已就绪，但本仓库还没有业务代码——现在跑 <code class="inline">/pdca</code> 会在 checker 一步 BLOCKED（找不到可运行的检查）。等 backend/frontend/tests 就位后，先拿小任务试跑一轮。</p>
+  </section>
+
+  <footer class="mono">loop-seed · /pdca guide · 2026-07-16 · 规则源文件：.claude/LOOP_RULES.md / CHECKS.md / agents/*.md / commands/pdca.md</footer>
+</div>
