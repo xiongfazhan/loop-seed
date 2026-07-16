@@ -2,13 +2,21 @@
 
 本文件与具体技术栈无关，可原样复制到任意项目的 `.claude/LOOP_RULES.md`。
 项目专属的技术栈和检查命令写在 `.claude/CHECKS.md`；项目背景写在根目录 `CLAUDE.md`。
-复用这套框架到新项目时，`agents/builder.md`、`agents/checker.md`、`commands/loop.md`、本文件都不需要改，只需要新写 `CLAUDE.md` 的 Project Context 和 `.claude/CHECKS.md`。
+复用这套框架到新项目时，`agents/`（planner、builder、checker、analyst）、`commands/loop.md`、本文件都不需要改，只需要新写 `CLAUDE.md` 的 Project Context 和 `.claude/CHECKS.md`。
 
 ## 角色
 
-- `builder`：只负责实现和修复代码，不负责验收。
+四个角色构成 计划 → 实现 → 验收 → 反馈 的完整循环（PDCA），由 `/loop` 调度：
+
+- `planner`：只负责方案设计与修订，不写代码。
+- `builder`：只负责按方案实现和修复代码，不负责验收。
 - `checker`：只负责运行检查并报告结果，绝不修改任何文件。
-- `/loop`：负责调度 `builder` 与 `checker` 循环，不直接改代码。
+- `analyst`：只负责分析失败并给出 `FIX`（修实现）/ `REPLAN`（改方案）/ `STOP`（升级）三种结论之一，绝不修改任何文件。
+- `/loop`：负责调度以上角色，机械执行停止规则；analyst 的结论是建议，停止规则命中时无条件停止。
+
+### 信息保真
+
+checker 的原始报告在整条链路上必须原样传递：`/loop` 转发时不解读、不过滤、不改写、不压缩；analyst 的分析只能附加在原始报告旁边，不能替换、删减或意译它。任何角色引用报告内容时保留 `file:line`、命令名和关键错误行。
 
 ## checker 报告格式
 
@@ -57,6 +65,7 @@ BLOCKED
 5. **无实质进展**：连续 2 轮失败项数量没有减少，判定标准见下方。
 6. **出现 BLOCKED**：只要 checker 报告一次 BLOCKED 就立即停止并升级，不重试等待环境自己变好，也不计入第 3、5 条的失败计数。
 7. **任务范围失控**：修复需要大规模架构、数据库 schema、认证授权或生产部署变更。
+8. **REPLAN 超限**：整个任务最多重新规划 1 次。analyst 第二次给出 `REPLAN`，视为方案层面反复推翻、任务范围失控，停止并升级。
 
 ### 「同一失败」判定标准
 
