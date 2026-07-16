@@ -2,21 +2,22 @@
 
 本文件与具体技术栈无关，可原样复制到任意项目的 `.claude/LOOP_RULES.md`。
 项目专属的技术栈和检查命令写在 `.claude/CHECKS.md`；项目背景写在根目录 `CLAUDE.md`。
-复用这套框架到新项目时，`agents/`（planner、builder、checker、analyst）、`commands/loop.md`、本文件都不需要改，只需要新写 `CLAUDE.md` 的 Project Context 和 `.claude/CHECKS.md`。
+复用这套框架到新项目时，`agents/`（planner、builder、checker、analyst）、`commands/pdca.md`、本文件都不需要改，只需要新写 `CLAUDE.md` 的 Project Context 和 `.claude/CHECKS.md`。
+调度命令命名为 `/pdca` 而不是 `/loop`，是为了避开 Claude Code 的同名内置命令。
 
 ## 角色
 
-四个角色构成 计划 → 实现 → 验收 → 反馈 的完整循环（PDCA），由 `/loop` 调度：
+四个角色构成 计划 → 实现 → 验收 → 反馈 的完整循环（PDCA），由 `/pdca` 调度：
 
 - `planner`：只负责方案设计与修订，不写代码。
 - `builder`：只负责按方案实现和修复代码，不负责验收。
 - `checker`：只负责运行检查并报告结果，绝不修改任何文件。
 - `analyst`：只负责分析失败并给出 `FIX`（修实现）/ `REPLAN`（改方案）/ `STOP`（升级）三种结论之一，绝不修改任何文件。
-- `/loop`：负责调度以上角色，机械执行停止规则；analyst 的结论是建议，停止规则命中时无条件停止。
+- `/pdca`：负责调度以上角色，机械执行停止规则；analyst 的结论是建议，停止规则命中时无条件停止。
 
 ### 信息保真
 
-checker 的原始报告在整条链路上必须原样传递：`/loop` 转发时不解读、不过滤、不改写、不压缩；analyst 的分析只能附加在原始报告旁边，不能替换、删减或意译它。任何角色引用报告内容时保留 `file:line`、命令名和关键错误行。
+checker 的原始报告在整条链路上必须原样传递：`/pdca` 转发时不解读、不过滤、不改写、不压缩；analyst 的分析只能附加在原始报告旁边，不能替换、删减或意译它。任何角色引用报告内容时保留 `file:line`、命令名和关键错误行。
 
 ## checker 报告格式
 
